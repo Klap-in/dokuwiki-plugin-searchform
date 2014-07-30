@@ -61,19 +61,11 @@ class action_plugin_searchform extends DokuWiki_Action_Plugin {
 
         $ns = cleanID($INPUT->str('ns'));
         if($ns) {
-            echo 'regexp';
-            var_dump(preg_match('/(?:^| )(?:@|ns:)[\w:]+/u', $query, $matches));
-            //add namespace if user hasn't already provide one                 [\w:]+
+            //add namespace if user hasn't already provide one
             if(!preg_match('/(?:^| )(?:@|ns:)[\w:]+/u', $query, $matches)) {
                 $query .= ' @' . $ns;
             }
-            var_dump($matches);
-            var_dump('a ns');
         }
-        else {
-            var_dump('no ns');
-        }
-        var_dump($query);
     }
 
 }
