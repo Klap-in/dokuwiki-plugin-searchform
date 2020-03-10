@@ -24,6 +24,7 @@ class action_plugin_searchform extends DokuWiki_Action_Plugin {
 
         $controller->register_hook('SEARCH_QUERY_FULLPAGE', 'BEFORE', $this, '_search_query_fullpage');
         $controller->register_hook('SEARCH_QUERY_PAGELOOKUP', 'BEFORE', $this, '_search_query_pagelookup');
+        $controller->register_hook('AJAX_CALL_UNKNOWN', 'BEFORE', $this,'_ajax_call');
 
     }
 
@@ -67,6 +68,59 @@ class action_plugin_searchform extends DokuWiki_Action_Plugin {
             }
         }
     }
+    
+    
+    # Adds the Ajax-Call "quickfullseach"
+	public function _ajax_call(Doku_Event $event, $param) {
+		if ($event->data !== 'quickfullsearch') {
+			return;
+		}
+    
+		# No other ajax call handlers needed
+		$event->stopPropagation();
+		$event->preventDefault();
+ 
+ 
+		# Perform Fullsearch
+		global $INPUT;
+
+		$query = $INPUT->post->str('q');
+		if(empty($query)) $query = $INPUT->get->str('q');
+		if(empty($query)) return;
+
+		$query = urldecode($query);
+        
+        # Add * to each term (excepting for namespaces) for real fulltext search
+        $terms = explode(' ',$query);
+        foreach ($terms as &$t) {
+			if (strpos($t,'*')===false && strpos($t,'@')===false) {				
+				$t="*$t*";
+				$search[] = $t;
+			}
+		}
+		$query=implode(' ',$terms);
+        
+		$regex = Array();
+		$data = ft_pageSearch($query,$regex);
+		
+		if(!count($data)) return;
+		
+		# display number of results
+		echo '<div class="qfs_result_num">' . count($data) . ' ' . $this->getLang('results') . '</div>';
+
+		# display results
+		foreach ($data as $id => $counts) {
+			echo '<div class="qfs_result">';
+			echo html_wikilink(':' . $id, $name,$search).'<br><div>' ;
+			
+			# Could not get ft_snippet to work properly, so uses rawWiki instead
+			echo substr(strip_tags(p_render('xhtml', p_get_instructions(rawWiki($id)))),0,300);
+			
+			echo '</div></div>';
+		}
+	
+				
+	}
 
 }
 

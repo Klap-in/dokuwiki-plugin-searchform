@@ -90,7 +90,7 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '<input type="hidden" class="searchform__ns" name="ns" value="' . $ns . '" />';
             $renderer->doc .= '<input type="text" ';
             if($ACT == 'search') $renderer->doc .= 'value="' . htmlspecialchars($QUERY) . '" ';
-            $renderer->doc .= 'name="id" class="edit searchform__qsearch_in" />' . "\n";
+            $renderer->doc .= 'name="id" class="edit searchform__qsearch_in" placeholder="' . $this->getLang('placeholder') . '" autocomplete="off" />' . "\n";
             $renderer->doc .= '<input type="submit" value="' . $lang['btn_search'] . '" class="button" title="' . $lang['btn_search'] . '" />' . "\n";
             $renderer->doc .= '<div class="ajax_qsearch JSpopup searchform__qsearch_out"></div>' . "\n";
             $renderer->doc .= '</div></form>' . "\n";
