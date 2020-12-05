@@ -4,23 +4,20 @@ jQuery(function () {
             var $input = jQuery(input);
             var $form = $input.parent().parent();
             var $output = $form.find('.searchform__qsearch_out');
-            var $ns = $form.find('.searchform__ns');
+            var $ns = $form.find('[name="ns"]');
 
             $input.dw_qsearch({
 
                 output: $output,
 
                 getSearchterm: function () {
-                    var query = $input.val(),
+                    let query = $input.val(),
                         reg = new RegExp("(?:^| )(?:@|ns:)[\\w:]+");
-
                     if (reg.test(query)) {
                         return query;
-                    } else {
-                        var namespace = $ns.val();
-                        return query + (namespace ? ' @' + namespace : '');
-
                     }
+                    let namespace = $ns.val();
+                    return query + (namespace ? ' @' + namespace : '');
                 }
             });
 
