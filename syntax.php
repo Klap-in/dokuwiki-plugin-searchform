@@ -7,7 +7,7 @@
  */
 
 // must be run within Dokuwiki
-if(!defined('DOKU_INC')) die();
+use dokuwiki\Extension\Event;
 
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
@@ -70,7 +70,7 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
      * @return  boolean                 rendered correctly?
      */
     public function render($format, Doku_Renderer $renderer, $data) {
-        global $lang, $INFO, $ACT, $QUERY;
+        global $lang, $INFO, $ACT, $QUERY, $ID;
 
         if($format == 'xhtml') {
             list($options,,) = $data;
@@ -84,17 +84,45 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
             }
 
             /** based on  tpl_searchform() */
-            $renderer->doc .= '<div class="searchform__form">' . "\n";
-            $renderer->doc .= '<form action="' . wl() . '" accept-charset="utf-8" class="search" id="searchform__search" method="get" role="search"><div class="no">' . "\n";
-            $renderer->doc .= '<input type="hidden" name="do" value="search" />' . "\n";
-            $renderer->doc .= '<input type="hidden" class="searchform__ns" name="ns" value="' . $ns . '" />';
-            $renderer->doc .= '<input type="text" ';
-            if($ACT == 'search') $renderer->doc .= 'value="' . htmlspecialchars($QUERY) . '" ';
-            $renderer->doc .= 'name="id" class="edit searchform__qsearch_in" />' . "\n";
-            $renderer->doc .= '<input type="submit" value="' . $lang['btn_search'] . '" class="button" title="' . $lang['btn_search'] . '" />' . "\n";
-            $renderer->doc .= '<div class="ajax_qsearch JSpopup searchform__qsearch_out"></div>' . "\n";
-            $renderer->doc .= '</div></form>' . "\n";
-            $renderer->doc .= '</div>' . "\n";
+            $autocomplete=true;
+            $ajax=true;
+
+            $searchForm = new dokuwiki\Form\Form([
+                                                     'action' => wl(),
+                                                     'method' => 'get',
+                                                     'role' => 'search',
+                                                     'class' => 'search',
+                                                 ], true);
+            $searchForm->addTagOpen('div')->addClass('no');
+            $searchForm->setHiddenField('do', 'search');
+            $searchForm->setHiddenField('id', $ID);
+            $searchForm->setHiddenField('ns', $ns)->addClass('searchform__ns');
+            $searchForm->addTextInput('q')
+                       ->addClass('edit searchform__qsearch_in')
+                       ->attrs([
+                                   'title' => '[F]',
+                                   'accesskey' => 'f',
+                                   'placeholder' => $lang['btn_search'],
+                                   'autocomplete' => $autocomplete ? 'on' : 'off',
+                               ])
+                       ->val($ACT === 'search' ? $QUERY : '')
+                       ->useInput(false)
+            ;
+            $searchForm->addButton('', $lang['btn_search'])->attrs([
+                                                                       'type' => 'submit',
+                                                                       'title' => $lang['btn_search'],
+                                                                   ]);
+            if ($ajax) {
+                $searchForm->addTagOpen('div')->addClass('ajax_qsearch JSpopup searchform__qsearch_out');
+                $searchForm->addTagClose('div');
+            }
+            $searchForm->addTagClose('div');
+            // TODO for 2021 release: update to the new event
+            Event::createAndTrigger('FORM_QUICKSEARCH_OUTPUT', $searchForm);
+
+            $renderer->doc .= '<div class="searchform__form">';
+            $renderer->doc .= $searchForm->toHTML();
+            $renderer->doc .= '</div>';
 
             return true;
         }
