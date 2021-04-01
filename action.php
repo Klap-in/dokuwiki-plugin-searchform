@@ -50,8 +50,15 @@ class action_plugin_searchform extends DokuWiki_Action_Plugin {
         $ns = cleanID($INPUT->str('ns'));
         if($ns) {
             //add namespace if user hasn't already provide one
-            if(!preg_match('/(?:^| )(?:@|ns:)[\w:]+/u', $query, $matches)) {
+            if(!preg_match('/(?:^| )(?:\^|@|-ns:|ns:)[\w:]+/u', $query, $matches)) {
                 $query .= ' @' . $ns;
+            }
+        }
+        $notns = cleanID($INPUT->str('-ns'));
+        if($notns) {
+            //add namespace if user hasn't already provide one
+            if(!preg_match('/(?:^| )(?:\^|@|-ns:|ns:)[\w:]+/u', $query, $matches)) {
+                $query .= ' ^' . $notns;
             }
         }
     }

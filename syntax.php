@@ -53,10 +53,11 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
         $match = trim(substr($match,11,-1)); //strip {searchform from start and } from end
         list($key,$value) = explode('=', $match, 2);
 
-        $options['namespace'] = null;
+        $options = ['namespace' => null, 'excludens' => false];
 
-        if(isset($key) && $key == 'ns') {
+        if(isset($key) && ($key == 'ns' || $key == '-ns')) {
             $options['namespace'] = cleanID($value);
+            $options['excludens'] = $key === '-ns';
         }
         return array($options, $state, $pos);
     }
@@ -64,9 +65,9 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
     /**
      * The actual output creation.
      *
-     * @param   $format   string        output format being rendered
-     * @param   $renderer Doku_Renderer reference to the current renderer object
-     * @param   $data     array         data created by handler()
+     * @param string $format output format being rendered
+     * @param Doku_Renderer $renderer reference to the current renderer object
+     * @param array $data data created by handler()
      * @return  boolean                 rendered correctly?
      */
     public function render($format, Doku_Renderer $renderer, $data) {
@@ -74,15 +75,19 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
 
         if($format == 'xhtml') {
             list($options,,) = $data;
-
+            print_r($options);
             // don't print the search form if search action has been disabled
             if(!actionOK('search')) return true;
 
             $ns = $options['namespace'];
+            $notns = '';
             if($ns === null) {
                 $ns = $INFO['namespace'];
             }
-
+            if($options['excludens']) {
+                $notns = $ns;
+                $ns = '';
+            }
             /** based on  tpl_searchform() */
             $autocomplete=true;
             $ajax=true;
@@ -97,6 +102,7 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
             $searchForm->setHiddenField('do', 'search');
             $searchForm->setHiddenField('id', $ID);
             $searchForm->setHiddenField('ns', $ns)->addClass('searchform__ns');
+            $searchForm->setHiddenField('-ns', $notns)->addClass('searchform__notns');
             $searchForm->addTextInput('q')
                        ->addClass('edit searchform__qsearch_in')
                        ->attrs([
@@ -106,8 +112,8 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
                                    'autocomplete' => $autocomplete ? 'on' : 'off',
                                ])
                        ->val($ACT === 'search' ? $QUERY : '')
-                       ->useInput(false)
-            ;
+                       ->useInput(false);
+
             $searchForm->addButton('', $lang['btn_search'])->attrs([
                                                                        'type' => 'submit',
                                                                        'title' => $lang['btn_search'],
