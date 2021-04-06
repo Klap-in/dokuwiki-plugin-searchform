@@ -75,7 +75,7 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
 
         if($format == 'xhtml') {
             list($options,,) = $data;
-            print_r($options);
+
             // don't print the search form if search action has been disabled
             if(!actionOK('search')) return true;
 
@@ -123,11 +123,9 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
                 $searchForm->addTagClose('div');
             }
             $searchForm->addTagClose('div');
-            // TODO for 2021 release: update to the new event
-            Event::createAndTrigger('FORM_QUICKSEARCH_OUTPUT', $searchForm);
 
             $renderer->doc .= '<div class="searchform__form">';
-            $renderer->doc .= $searchForm->toHTML();
+            $renderer->doc .= $searchForm->toHTML('quicksearch');
             $renderer->doc .= '</div>';
 
             return true;
