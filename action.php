@@ -6,30 +6,34 @@
  * @author  Gerrit Uitslag <klapinklapin@gmail.com>
  */
 
+use dokuwiki\Extension\ActionPlugin;
+use dokuwiki\Extension\Event;
+use dokuwiki\Extension\EventHandler;
+
 /**
  * Class action_plugin_searchform
  */
-class action_plugin_searchform extends DokuWiki_Action_Plugin {
+class action_plugin_searchform extends ActionPlugin {
 
     /**
      * Registers a callback function for a given event
      *
-     * @param Doku_Event_Handler $controller DokuWiki's event controller object
+     * @param EventHandler $controller DokuWiki's event controller object
      * @return void
      */
-    public function register(Doku_Event_Handler $controller) {
+    public function register(EventHandler $controller) {
         $controller->register_hook('DOKUWIKI_STARTED', 'AFTER',  $this, 'changeQuery');
     }
 
     /**
      * Restrict the global query to namespace given as url parameter
      *
-     * @param Doku_Event $event  event object by reference
-     * @param mixed      $param  [the parameters passed as fifth argument to register_hook() when this
-     *                           handler was registered]
+     * @param Event $event event object by reference
+     * @param mixed $param [the parameters passed as fifth argument to register_hook() when this
+     *                     handler was registered]
      * @return void
      */
-    public function changeQuery(Doku_Event &$event, $param) {
+    public function changeQuery(Event $event, $param) {
         global $QUERY;
         global $ACT;
 

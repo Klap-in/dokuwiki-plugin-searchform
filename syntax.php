@@ -6,14 +6,13 @@
  * @author     Adolfo González Blázquez <code@infinicode.org>
  */
 
-// must be run within Dokuwiki
-use dokuwiki\Extension\Event;
+use dokuwiki\Extension\SyntaxPlugin;
 
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class
  */
-class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_searchform extends SyntaxPlugin {
 
     /**
      * Syntax Type
@@ -51,7 +50,7 @@ class syntax_plugin_searchform extends DokuWiki_Syntax_Plugin {
      */
     public function handle($match, $state, $pos, Doku_Handler $handler) {
         $match = trim(substr($match,11,-1)); //strip {searchform from start and } from end
-        list($key,$value) = explode('=', $match, 2);
+        list($key, $value) = array_pad(explode('=', $match, 2), 2, null);
 
         $options = ['namespace' => null, 'excludens' => false];
 
